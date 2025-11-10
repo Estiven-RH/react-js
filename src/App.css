@@ -1,0 +1,107 @@
+/* === ESTILOS GLOBALES === */
+body {
+  font-family: Arial, sans-serif;
+  background: #f2f2f2;
+  margin: 0;
+  padding: 0;
+}
+
+/* === CONTENEDOR PRINCIPAL === */
+.app-container {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* === TÍTULO === */
+.app-title {
+  color: #008037;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+/* === FORMULARIO DE CONTACTO === */
+.form-contacto {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.form-contacto input {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+.form-contacto button {
+  background: #008037;
+  color: #fff;
+  border: 0;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
+}
+
+.form-contacto button:hover {
+  background: #006b2f;
+}
+
+/* === TARJETAS DE CONTACTO === */
+.tarjeta-contacto {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1rem;
+  background: #fff;
+  margin-bottom: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tarjeta-contacto h3 {
+  color: #008037;
+  margin: 0 0 0.3rem;
+}
+
+.tarjeta-contacto .dato {
+  margin: 0;
+  color: #333;
+}
+
+.tarjeta-contacto .tag {
+  display: inline-block;
+  background: #39A900;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.85em;
+  align-self: flex-start;
+}
+
+/* === BOTONES === */
+.btn-eliminar {
+  background: #c62828;
+  color: #fff;
+  border: 0;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
+}
+
+.btn-eliminar:hover {
+  background: #8e0000;
+}
+
+/* === CONTENEDOR DE ACCIONES === */
+.tarjeta-contacto .acciones {
+  margin-top: 8px;
+  display: flex;
+  justify-content: flex-end;
+}
