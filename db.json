@@ -1,0 +1,18 @@
+{
+  "contactos": [
+    {
+      "id": "a3f6",
+      "nombre": "juan",
+      "telefono": "3115429648",
+      "correo": "juanse@gmail.com",
+      "etiqueta": "Profesor"
+    },
+    {
+      "id": "266c",
+      "nombre": "Jose",
+      "telefono": "3115429648",
+      "correo": "joselito@gmail.com",
+      "etiqueta": "Profesor"
+    }
+  ]
+}

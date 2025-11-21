@@ -1,76 +1,179 @@
-import { useState, useEffect } from "react";
-import "./App.css";
-import ContactoCard from "./components/ContactoCard";
+// Importamos useEffect y useState para manejar estados y efectos en el componente principal
+import { useEffect, useState } from "react";
+
+// Importamos los servicios que se comunican con JSON Server
+import {
+  listarContactos,
+  crearContacto,
+  eliminarContactoPorId,
+  actualizarContacto,
+  obtenerContactoPorId,
+} from "./api";
+
+// Importamos los componentes hijos
 import FormularioContacto from "./components/FormularioContacto";
+import ContactoCard from "./components/ContactoCard";
 
-export default function App() {
-  // 🧠 Cargar contactos desde localStorage al iniciar
-  const [contactos, setContactos] = useState(() => {
-    const guardados = localStorage.getItem("contactos");
-    return guardados
-      ? JSON.parse(guardados)
-      : [
-          {
-            id: 1,
-            nombre: "Carolina Pérez",
-            telefono: "300 123 4567",
-            correo: "carolina@sena.edu.co",
-            etiqueta: "Compañera",
-          },
-        ];
-  });
+// Componente principal de la aplicación
+function App() {
+  // Estado que almacena la lista de contactos obtenidos de la API
+  const [contactos, setContactos] = useState([]);
 
-  // 💾 Guardar automáticamente los contactos cada vez que cambian
+  // Estado que indica si estamos cargando información (por ejemplo, al inicio)
+  const [cargando, setCargando] = useState(true);
+
+  // Estado para guardar mensajes de error generales de la aplicación
+  const [error, setError] = useState("");
+
+  // Estado para manejar modo edición
+  const [contactoEnEdicion, setContactoEnEdicion] = useState(null);
+
+  // useEffect que se ejecuta una sola vez al montar el componente
+  // Aquí cargamos los contactos iniciales desde JSON Server
   useEffect(() => {
-    localStorage.setItem("contactos", JSON.stringify(contactos));
-  }, [contactos]);
+    const cargarContactos = async () => {
+      try {
+        setCargando(true); // Indicamos que estamos cargando
+        setError(""); // Limpiamos posibles errores anteriores
 
-  // ➕ Agregar contacto
-  const agregarContacto = (nuevo) => {
-    setContactos((prev) => [...prev, { id: Date.now(), ...nuevo }]);
+        const data = await listarContactos(); // Llamamos a la API
+        setContactos(data); // Guardamos la lista de contactos en el estado
+      } catch (error) {
+        console.error("Error al cargar contactos:", error);
+        setError(
+          "No se pudieron cargar los contactos. Verifica que el servidor esté encendido e intenta de nuevo."
+        );
+      } finally {
+        setCargando(false);
+      }
+    };
+
+    cargarContactos();
+  }, []);
+
+  // Función que se encarga de agregar un nuevo contacto usando la API
+  const onAgregarContacto = async (nuevoContacto) => {
+    try {
+      setError("");
+      const creado = await crearContacto(nuevoContacto);
+      setContactos((prev) => [...prev, creado]);
+    } catch (error) {
+      console.error("Error al crear contacto:", error);
+      setError(
+        "No se pudo guardar el contacto. Verifica tu conexión o el estado del servidor e intenta nuevamente."
+      );
+      throw error; // opcional
+    }
   };
 
-  // ❌ Eliminar contacto
-  const eliminarContacto = (id) => {
-    setContactos((prev) => prev.filter((c) => c.id !== id));
+  // Función para eliminar un contacto por su id
+  const onEliminarContacto = async (id) => {
+    try {
+      setError("");
+      await eliminarContactoPorId(id);
+      setContactos((prev) => prev.filter((c) => c.id !== id));
+    } catch (error) {
+      console.error("Error al eliminar contacto:", error);
+      setError(
+        "No se pudo eliminar el contacto. Vuelve a intentarlo o verifica el servidor."
+      );
+    }
   };
 
+  // Cargar contacto al formulario para editar
+  const onEditarContacto = async (id) => {
+    try {
+      const contacto = await obtenerContactoPorId(id);
+      setContactoEnEdicion(contacto);
+    } catch (error) {
+      console.error("Error al obtener contacto:", error);
+      setError("No se pudo cargar el contacto para editar.");
+    }
+  };
+
+  // Guardar edición
+  const onGuardarEdicion = async (id, datosActualizados) => {
+    try {
+      setError("");
+      const actualizado = await actualizarContacto(id, datosActualizados);
+
+      setContactos((prev) =>
+        prev.map((c) => (c.id === id ? actualizado : c))
+      );
+
+      setContactoEnEdicion(null);
+    } catch (error) {
+      console.error("Error al actualizar:", error);
+      setError("No se pudo actualizar el contacto.");
+    }
+  };
+
+  // JSX que renderiza la aplicación
   return (
-    <main className="max-w-2xl mx-auto mt-10 p-4 relative">
-      {/* Texto superior izquierdo */}
-      <header className="fixed top-2 left-4">
-        <h1 className="text-base text-black font-normal flex items-center gap-1">
-          Tailwind Funciona 
-          <span className="text-purple-500">💜</span>
-        </h1>
-      </header>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        {/* Encabezado */}
+        <header className="mb-8">
+          <p className="text-xs tracking-[0.3em] text-gray-500 uppercase">
+            Desarrollo Web ReactJS Ficha 3223876
+          </p>
+          <h1 className="text-4xl font-extrabold text-gray-900 mt-2">
+            Agenda ADSO v6
+          </h1>
+          <p className="text-sm text-gray-600 mt-1">
+            Gestión de contactos conectada a una API local con JSON Server,
+            ahora con validaciones y mejor experiencia de usuario.
+          </p>
+        </header>
 
-      {/* Título principal */}
-      <h1 className="text-3xl font-bold text-purple-700 text-center mb-2">
-        Agenda ADSO v4
-      </h1>
+        {/* Error global */}
+        {error && (
+          <div className="mb-4 rounded-xl bg-red-50 border border-red-200 px-4 py-3">
+            <p className="text-sm font-medium text-red-700">{error}</p>
+          </div>
+        )}
 
-      <p className="text-gray-500 text-center mb-6">
-        Interfaz moderna con TailwindCSS
-      </p>
+        {/* Cargando */}
+        {cargando ? (
+          <p className="text-sm text-gray-500">Cargando contactos...</p>
+        ) : (
+          <>
+            {/* Formulario */}
+            <FormularioContacto
+              onAgregar={onAgregarContacto}
+              contactoEnEdicion={contactoEnEdicion}
+              onGuardarEdicion={onGuardarEdicion}
+            />
 
-      {/* Formulario */}
-      <FormularioContacto onAgregar={agregarContacto} />
+            {/* Lista */}
+            <section className="space-y-4">
+              {contactos.length === 0 ? (
+                <p className="text-sm text-gray-500">
+                  Aún no tienes contactos registrados. Agrega el primero usando
+                  el formulario superior.
+                </p>
+              ) : (
+                contactos.map((c) => (
+                  <ContactoCard
+                    key={c.id}
+                    {...c}
+                    onEliminar={() => onEliminarContacto(c.id)}
+                    onEditar={() => onEditarContacto(c.id)}
+                  />
+                ))
+              )}
+            </section>
+          </>
+        )}
 
-      {/* Lista de contactos */}
-      <section className="mt-6 space-y-4">
-        {contactos.map((c) => (
-          <ContactoCard
-            key={c.id}
-            id={c.id}
-            nombre={c.nombre}
-            telefono={c.telefono}
-            correo={c.correo}
-            etiqueta={c.etiqueta}
-            onEliminar={eliminarContacto}
-          />
-        ))}
-      </section>
-    </main>
+        {/* Footer */}
+        <footer className="mt-8 text-xs text-gray-400">
+          <p>Desarrollo Web – ReactJS | Proyecto Agenda ADSO</p>
+          <p>Instructor: Gustavo Adolfo Bolaños Dorado</p>
+        </footer>
+      </div>
+    </div>
   );
 }
+
+export default App;
