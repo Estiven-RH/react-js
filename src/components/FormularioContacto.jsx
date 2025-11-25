@@ -19,6 +19,9 @@ export default function FormularioContacto({ onAgregar }) {
   // Estado de envío
   const [enviando, setEnviando] = useState(false);
 
+  // Error global de API
+  const [errorApi, setErrorApi] = useState("");
+
   // onChange genérico
   const onChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -56,6 +59,8 @@ export default function FormularioContacto({ onAgregar }) {
   const onSubmit = async (e) => {
     e.preventDefault();
 
+    setErrorApi(""); // limpiar error
+
     const valido = validarFormulario();
     if (!valido) return;
 
@@ -67,6 +72,10 @@ export default function FormularioContacto({ onAgregar }) {
       // Reiniciar formulario y errores
       setForm({ nombre: "", telefono: "", correo: "", etiqueta: "" });
       setErrores({ nombre: "", telefono: "", correo: "" });
+    } catch (error) {
+      setErrorApi(
+        "❌ No se pudo guardar el contacto. Revisa si el servidor JSON está activo."
+      );
     } finally {
       setEnviando(false);
     }
@@ -149,6 +158,11 @@ export default function FormularioContacto({ onAgregar }) {
       >
         {enviando ? "Guardando..." : "Agregar contacto"}
       </button>
+
+      {/* Error de API */}
+      {errorApi && (
+        <p className="text-sm text-red-600 font-medium mt-2">{errorApi}</p>
+      )}
     </form>
   );
 }

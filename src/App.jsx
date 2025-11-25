@@ -1,4 +1,4 @@
-// Importamos useEffect y useState para manejar estados y efectos en el componente principal
+// Importamos useEffect y useState para manejar estados y efectos
 import { useEffect, useState } from "react";
 
 // Importamos los servicios que se comunican con JSON Server
@@ -10,34 +10,29 @@ import {
   obtenerContactoPorId,
 } from "./api";
 
-// Importamos los componentes hijos
+// Importamos APP_INFO desde config.js
+import { APP_INFO } from "./config";
+
+// Componentes hijos
 import FormularioContacto from "./components/FormularioContacto";
 import ContactoCard from "./components/ContactoCard";
 
-// Componente principal de la aplicación
+// Componente principal
 function App() {
-  // Estado que almacena la lista de contactos obtenidos de la API
   const [contactos, setContactos] = useState([]);
-
-  // Estado que indica si estamos cargando información (por ejemplo, al inicio)
   const [cargando, setCargando] = useState(true);
-
-  // Estado para guardar mensajes de error generales de la aplicación
   const [error, setError] = useState("");
-
-  // Estado para manejar modo edición
   const [contactoEnEdicion, setContactoEnEdicion] = useState(null);
 
-  // useEffect que se ejecuta una sola vez al montar el componente
-  // Aquí cargamos los contactos iniciales desde JSON Server
+  // Cargar contactos al iniciar
   useEffect(() => {
     const cargarContactos = async () => {
       try {
-        setCargando(true); // Indicamos que estamos cargando
-        setError(""); // Limpiamos posibles errores anteriores
+        setCargando(true);
+        setError("");
 
-        const data = await listarContactos(); // Llamamos a la API
-        setContactos(data); // Guardamos la lista de contactos en el estado
+        const data = await listarContactos();
+        setContactos(data);
       } catch (error) {
         console.error("Error al cargar contactos:", error);
         setError(
@@ -51,7 +46,7 @@ function App() {
     cargarContactos();
   }, []);
 
-  // Función que se encarga de agregar un nuevo contacto usando la API
+  // Crear contacto
   const onAgregarContacto = async (nuevoContacto) => {
     try {
       setError("");
@@ -62,11 +57,11 @@ function App() {
       setError(
         "No se pudo guardar el contacto. Verifica tu conexión o el estado del servidor e intenta nuevamente."
       );
-      throw error; // opcional
+      throw error;
     }
   };
 
-  // Función para eliminar un contacto por su id
+  // Eliminar contacto
   const onEliminarContacto = async (id) => {
     try {
       setError("");
@@ -74,13 +69,11 @@ function App() {
       setContactos((prev) => prev.filter((c) => c.id !== id));
     } catch (error) {
       console.error("Error al eliminar contacto:", error);
-      setError(
-        "No se pudo eliminar el contacto. Vuelve a intentarlo o verifica el servidor."
-      );
+      setError("No se pudo eliminar el contacto. Verifica el servidor.");
     }
   };
 
-  // Cargar contacto al formulario para editar
+  // Cargar contacto para editar
   const onEditarContacto = async (id) => {
     try {
       const contacto = await obtenerContactoPorId(id);
@@ -95,6 +88,7 @@ function App() {
   const onGuardarEdicion = async (id, datosActualizados) => {
     try {
       setError("");
+
       const actualizado = await actualizarContacto(id, datosActualizados);
 
       setContactos((prev) =>
@@ -108,21 +102,23 @@ function App() {
     }
   };
 
-  // JSX que renderiza la aplicación
+  // JSX
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-4xl mx-auto px-4 py-8">
-        {/* Encabezado */}
+        
+        {/* Encabezado con APP_INFO */}
         <header className="mb-8">
           <p className="text-xs tracking-[0.3em] text-gray-500 uppercase">
-            Desarrollo Web ReactJS Ficha 3223876
+            Desarrollo Web ReactJS Ficha {APP_INFO.ficha}
           </p>
+
           <h1 className="text-4xl font-extrabold text-gray-900 mt-2">
-            Agenda ADSO v6
+            {APP_INFO.titulo}
           </h1>
+
           <p className="text-sm text-gray-600 mt-1">
-            Gestión de contactos conectada a una API local con JSON Server,
-            ahora con validaciones y mejor experiencia de usuario.
+            {APP_INFO.subtitulo}
           </p>
         </header>
 
@@ -133,7 +129,7 @@ function App() {
           </div>
         )}
 
-        {/* Cargando */}
+        {/* Si está cargando */}
         {cargando ? (
           <p className="text-sm text-gray-500">Cargando contactos...</p>
         ) : (
@@ -145,12 +141,11 @@ function App() {
               onGuardarEdicion={onGuardarEdicion}
             />
 
-            {/* Lista */}
+            {/* Lista de contactos */}
             <section className="space-y-4">
               {contactos.length === 0 ? (
                 <p className="text-sm text-gray-500">
-                  Aún no tienes contactos registrados. Agrega el primero usando
-                  el formulario superior.
+                  Aún no tienes contactos registrados. Agrega el primero usando el formulario superior.
                 </p>
               ) : (
                 contactos.map((c) => (
