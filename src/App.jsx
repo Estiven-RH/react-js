@@ -104,68 +104,105 @@ function App() {
 
   // JSX
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        
-        {/* Encabezado con APP_INFO */}
-        <header className="mb-8">
-          <p className="text-xs tracking-[0.3em] text-gray-500 uppercase">
-            Desarrollo Web ReactJS Ficha {APP_INFO.ficha}
-          </p>
+    <div className="min-h-screen bg-[#0f1117] text-white px-8 py-10">
 
-          <h1 className="text-4xl font-extrabold text-gray-900 mt-2">
-            {APP_INFO.titulo}
-          </h1>
+      {/* HEADER */}
+      <header className="flex justify-between items-center mb-10">
+        <div>
+          <h1 className="text-2xl font-bold">{APP_INFO.titulo}</h1>
+          <p className="text-sm opacity-70">{APP_INFO.subtitulo}</p>
+        </div>
 
-          <p className="text-sm text-gray-600 mt-1">
-            {APP_INFO.subtitulo}
-          </p>
-        </header>
+        <div className="text-right">
+          <p className="text-sm opacity-70">SENA CTMA</p>
+          <p className="font-semibold">Ficha {APP_INFO.ficha}</p>
+        </div>
+      </header>
 
-        {/* Error global */}
-        {error && (
-          <div className="mb-4 rounded-xl bg-red-50 border border-red-200 px-4 py-3">
-            <p className="text-sm font-medium text-red-700">{error}</p>
-          </div>
-        )}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
 
-        {/* Si está cargando */}
-        {cargando ? (
-          <p className="text-sm text-gray-500">Cargando contactos...</p>
-        ) : (
-          <>
-            {/* Formulario */}
-            <FormularioContacto
-              onAgregar={onAgregarContacto}
-              contactoEnEdicion={contactoEnEdicion}
-              onGuardarEdicion={onGuardarEdicion}
-            />
+        {/* IZQUIERDA */}
+        <div className="lg:col-span-2">
+          <div className="bg-white rounded-3xl p-10 text-[#1b1f2a] shadow-xl">
 
-            {/* Lista de contactos */}
-            <section className="space-y-4">
-              {contactos.length === 0 ? (
-                <p className="text-sm text-gray-500">
-                  Aún no tienes contactos registrados. Agrega el primero usando el formulario superior.
-                </p>
+            <h1 className="text-4xl font-bold">Agenda ADSO v7</h1>
+            <p className="mt-2 opacity-70">
+              Gestión de contactos conectada a una API local con JSON Server, con validaciones y mejor experiencia de usuario.
+            </p>
+
+            <div className="flex items-center gap-2 mt-4">
+              <span className="w-3 h-3 bg-green-500 rounded-full"></span>
+              <p className="text-sm font-medium">{contactos.length} contactos</p>
+            </div>
+
+            <div className="bg-white mt-6 p-8 rounded-2xl border border-gray-200">
+
+              <h2 className="text-2xl font-bold mb-4">
+                {contactoEnEdicion ? "Editar contacto" : "Nuevo contacto"}
+              </h2>
+
+              <FormularioContacto
+                onAgregar={onAgregarContacto}
+                contactoEnEdicion={contactoEnEdicion}
+                onGuardarEdicion={onGuardarEdicion}
+              />
+            </div>
+
+            {/* Lista contactos */}
+            <div className="mt-8">
+              {cargando ? (
+                <p className="text-sm text-gray-600">Cargando contactos...</p>
+              ) : contactos.length === 0 ? (
+                <p className="text-sm text-gray-600">No hay contactos registrados.</p>
               ) : (
-                contactos.map((c) => (
-                  <ContactoCard
-                    key={c.id}
-                    {...c}
-                    onEliminar={() => onEliminarContacto(c.id)}
-                    onEditar={() => onEditarContacto(c.id)}
-                  />
-                ))
+                <div className="space-y-4">
+                  {contactos.map((c) => (
+                    <ContactoCard
+                      key={c.id}
+                      {...c}
+                      onEliminar={() => onEliminarContacto(c.id)}
+                      onEditar={() => onEditarContacto(c.id)}
+                    />
+                  ))}
+                </div>
               )}
-            </section>
-          </>
-        )}
+            </div>
+          </div>
+        </div>
 
-        {/* Footer */}
-        <footer className="mt-8 text-xs text-gray-400">
-          <p>Desarrollo Web – ReactJS | Proyecto Agenda ADSO</p>
-          <p>Instructor: Gustavo Adolfo Bolaños Dorado</p>
-        </footer>
+        {/* DERECHA */}
+        <div className="flex flex-col gap-6">
+
+          <div className="bg-[#9b4dff] p-8 rounded-3xl shadow-xl">
+            <h2 className="text-2xl font-bold">Agenda ADSO – Dashboard</h2>
+            <p className="opacity-90 mt-2">
+              CRUD completo con React, JSON Server y validaciones.
+            </p>
+
+            <div className="mt-4">
+              <p className="font-semibold">Contactos registrados</p>
+              <p className="text-3xl font-bold">{contactos.length}</p>
+            </div>
+          </div>
+
+          <div className="bg-[#f2f2f2] text-[#1b1f2a] p-7 rounded-3xl shadow-md">
+            <h3 className="text-xl font-bold">Tips de código limpio</h3>
+            <ul className="mt-3 space-y-1 text-sm">
+              <li>• Nombra componentes según su responsabilidad.</li>
+              <li>• Extrae funciones reutilizables.</li>
+              <li>• Comenta la intención, no lo obvio.</li>
+              <li>• Archivos pequeños y claros.</li>
+            </ul>
+          </div>
+
+          <div className="bg-[#1b1f2a] p-7 rounded-3xl shadow-md">
+            <h3 className="text-xl font-bold">Desarrollo Web – ReactJS</h3>
+            <p className="mt-3 text-sm opacity-80">
+              “Pequeños proyectos bien cuidados valen más que mil ideas sin código.”
+            </p>
+          </div>
+
+        </div>
       </div>
     </div>
   );
