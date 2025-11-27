@@ -24,6 +24,12 @@ function App() {
   const [error, setError] = useState("");
   const [contactoEnEdicion, setContactoEnEdicion] = useState(null);
 
+  // 🔍 Nuevo estado: búsqueda
+  const [busqueda, setBusqueda] = useState("");
+
+  // 🔽 Nuevo estado: orden A-Z / Z-A
+  const [ordenAsc, setOrdenAsc] = useState(true);
+
   // Cargar contactos al iniciar
   useEffect(() => {
     const cargarContactos = async () => {
@@ -102,7 +108,22 @@ function App() {
     }
   };
 
-  // JSX
+  // 🧠 FILTRADO DE CONTACTOS
+  const contactosFiltrados = contactos
+    .filter((c) => {
+      const termino = busqueda.toLowerCase();
+      return (
+        c.nombre.toLowerCase().includes(termino) ||
+        c.correo.toLowerCase().includes(termino) ||
+        c.etiqueta.toLowerCase().includes(termino)
+      );
+    })
+    .sort((a, b) =>
+      ordenAsc
+        ? a.nombre.localeCompare(b.nombre)
+        : b.nombre.localeCompare(a.nombre)
+    );
+
   return (
     <div className="min-h-screen bg-[#0f1117] text-white px-8 py-10">
 
@@ -127,16 +148,28 @@ function App() {
 
             <h1 className="text-4xl font-bold">Agenda ADSO v7</h1>
             <p className="mt-2 opacity-70">
-              Gestión de contactos conectada a una API local con JSON Server, con validaciones y mejor experiencia de usuario.
+              Gestión de contactos conectada a una API local con JSON Server.
             </p>
 
-            <div className="flex items-center gap-2 mt-4">
-              <span className="w-3 h-3 bg-green-500 rounded-full"></span>
-              <p className="text-sm font-medium">{contactos.length} contactos</p>
+            {/* 🔍 Búsqueda + Ordenamiento */}
+            <div className="flex gap-3 mt-6">
+              <input
+                type="text"
+                placeholder="Buscar por nombre, correo o etiqueta..."
+                className="flex-1 px-4 py-2 rounded-xl border border-gray-300"
+                value={busqueda}
+                onChange={(e) => setBusqueda(e.target.value)}
+              />
+
+              <button
+                className="px-4 py-2 bg-[#9b4dff] text-white rounded-xl"
+                onClick={() => setOrdenAsc(!ordenAsc)}
+              >
+                {ordenAsc ? "A → Z" : "Z → A"}
+              </button>
             </div>
 
             <div className="bg-white mt-6 p-8 rounded-2xl border border-gray-200">
-
               <h2 className="text-2xl font-bold mb-4">
                 {contactoEnEdicion ? "Editar contacto" : "Nuevo contacto"}
               </h2>
@@ -152,11 +185,13 @@ function App() {
             <div className="mt-8">
               {cargando ? (
                 <p className="text-sm text-gray-600">Cargando contactos...</p>
-              ) : contactos.length === 0 ? (
-                <p className="text-sm text-gray-600">No hay contactos registrados.</p>
+              ) : contactosFiltrados.length === 0 ? (
+                <p className="text-sm text-gray-600">
+                  No se encontraron contactos que coincidan con la búsqueda.
+                </p>
               ) : (
                 <div className="space-y-4">
-                  {contactos.map((c) => (
+                  {contactosFiltrados.map((c) => (
                     <ContactoCard
                       key={c.id}
                       {...c}
@@ -167,6 +202,7 @@ function App() {
                 </div>
               )}
             </div>
+
           </div>
         </div>
 
@@ -178,28 +214,10 @@ function App() {
             <p className="opacity-90 mt-2">
               CRUD completo con React, JSON Server y validaciones.
             </p>
-
             <div className="mt-4">
               <p className="font-semibold">Contactos registrados</p>
               <p className="text-3xl font-bold">{contactos.length}</p>
             </div>
-          </div>
-
-          <div className="bg-[#f2f2f2] text-[#1b1f2a] p-7 rounded-3xl shadow-md">
-            <h3 className="text-xl font-bold">Tips de código limpio</h3>
-            <ul className="mt-3 space-y-1 text-sm">
-              <li>• Nombra componentes según su responsabilidad.</li>
-              <li>• Extrae funciones reutilizables.</li>
-              <li>• Comenta la intención, no lo obvio.</li>
-              <li>• Archivos pequeños y claros.</li>
-            </ul>
-          </div>
-
-          <div className="bg-[#1b1f2a] p-7 rounded-3xl shadow-md">
-            <h3 className="text-xl font-bold">Desarrollo Web – ReactJS</h3>
-            <p className="mt-3 text-sm opacity-80">
-              “Pequeños proyectos bien cuidados valen más que mil ideas sin código.”
-            </p>
           </div>
 
         </div>
