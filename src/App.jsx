@@ -1,7 +1,5 @@
-// Importamos useEffect y useState para manejar estados y efectos
 import { useEffect, useState } from "react";
 
-// Importamos los servicios que se comunican con JSON Server
 import {
   listarContactos,
   crearContacto,
@@ -10,27 +8,21 @@ import {
   obtenerContactoPorId,
 } from "./api";
 
-// Importamos APP_INFO desde config.js
 import { APP_INFO } from "./config";
 
-// Componentes hijos
 import FormularioContacto from "./components/FormularioContacto";
 import ContactoCard from "./components/ContactoCard";
 
-// Componente principal
 function App() {
   const [contactos, setContactos] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
   const [contactoEnEdicion, setContactoEnEdicion] = useState(null);
 
-  // 🔍 Nuevo estado: búsqueda
   const [busqueda, setBusqueda] = useState("");
-
-  // 🔽 Nuevo estado: orden A-Z / Z-A
   const [ordenAsc, setOrdenAsc] = useState(true);
 
-  // Cargar contactos al iniciar
+  // Cargar contactos
   useEffect(() => {
     const cargarContactos = async () => {
       try {
@@ -79,7 +71,7 @@ function App() {
     }
   };
 
-  // Cargar contacto para editar
+  // Editar contacto
   const onEditarContacto = async (id) => {
     try {
       const contacto = await obtenerContactoPorId(id);
@@ -90,7 +82,7 @@ function App() {
     }
   };
 
-  // Guardar edición
+  // Guardar cambios
   const onGuardarEdicion = async (id, datosActualizados) => {
     try {
       setError("");
@@ -101,14 +93,13 @@ function App() {
         prev.map((c) => (c.id === id ? actualizado : c))
       );
 
-      setContactoEnEdicion(null);
+      setContactoEnEdicion(null); // ✔ limpiar estado de edición
     } catch (error) {
       console.error("Error al actualizar:", error);
       setError("No se pudo actualizar el contacto.");
     }
   };
 
-  // 🧠 FILTRADO DE CONTACTOS
   const contactosFiltrados = contactos
     .filter((c) => {
       const termino = busqueda.toLowerCase();
@@ -126,8 +117,6 @@ function App() {
 
   return (
     <div className="min-h-screen bg-[#0f1117] text-white px-8 py-10">
-
-      {/* HEADER */}
       <header className="flex justify-between items-center mb-10">
         <div>
           <h1 className="text-2xl font-bold">{APP_INFO.titulo}</h1>
@@ -141,21 +130,18 @@ function App() {
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-
-        {/* IZQUIERDA */}
         <div className="lg:col-span-2">
           <div className="bg-white rounded-3xl p-10 text-[#1b1f2a] shadow-xl">
-
             <h1 className="text-4xl font-bold">Agenda ADSO v7</h1>
             <p className="mt-2 opacity-70">
               Gestión de contactos conectada a una API local con JSON Server.
             </p>
 
-            {/* 🔍 Búsqueda + Ordenamiento */}
+            {/* Búsqueda */}
             <div className="flex gap-3 mt-6">
               <input
                 type="text"
-                placeholder="Buscar por nombre, correo o etiqueta..."
+                placeholder="Buscar..."
                 className="flex-1 px-4 py-2 rounded-xl border border-gray-300"
                 value={busqueda}
                 onChange={(e) => setBusqueda(e.target.value)}
@@ -169,6 +155,7 @@ function App() {
               </button>
             </div>
 
+            {/* 🟣 FORMULARIO */}
             <div className="bg-white mt-6 p-8 rounded-2xl border border-gray-200">
               <h2 className="text-2xl font-bold mb-4">
                 {contactoEnEdicion ? "Editar contacto" : "Nuevo contacto"}
@@ -181,13 +168,13 @@ function App() {
               />
             </div>
 
-            {/* Lista contactos */}
+            {/* Lista de contactos */}
             <div className="mt-8">
               {cargando ? (
                 <p className="text-sm text-gray-600">Cargando contactos...</p>
               ) : contactosFiltrados.length === 0 ? (
                 <p className="text-sm text-gray-600">
-                  No se encontraron contactos que coincidan con la búsqueda.
+                  No se encontraron contactos.
                 </p>
               ) : (
                 <div className="space-y-4">
@@ -202,13 +189,10 @@ function App() {
                 </div>
               )}
             </div>
-
           </div>
         </div>
 
-        {/* DERECHA */}
         <div className="flex flex-col gap-6">
-
           <div className="bg-[#9b4dff] p-8 rounded-3xl shadow-xl">
             <h2 className="text-2xl font-bold">Agenda ADSO – Dashboard</h2>
             <p className="opacity-90 mt-2">
@@ -219,7 +203,6 @@ function App() {
               <p className="text-3xl font-bold">{contactos.length}</p>
             </div>
           </div>
-
         </div>
       </div>
     </div>
