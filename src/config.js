@@ -1,24 +1,19 @@
 // Archivo: src/config.js
-// Este archivo centraliza configuraciones reutilizables de la Agenda ADSO.
+// Configuración centralizada de la Agenda ADSO
 
 // =============================================
 // URL base del backend (JSON Server)
-// Si cambia el puerto o la ruta, solo se modifica aquí.
+// Nunca incluir /contactos aquí, solo la URL base.
 // =============================================
-export const API_BASE_URL = "http://localhost:3002/contactos";
+export const API_BASE_URL = "http://localhost:3001";  
+// En producción Netlify usará otra URL (te la configuro después)
 
 // =============================================
 // Información general de la aplicación
-// Usada en App.jsx u otros componentes
 // =============================================
 export const APP_INFO = {
-  // Número de ficha que se muestra en el encabezado
   ficha: "3223876",
-
-  // Título principal de la aplicación
-  titulo: "Agenda ADSO v7",
-
-  // Subtítulo o descripción corta
+  titulo: "Agenda ADSO v10",
   subtitulo:
-    "Gestión de contactos conectada a una API local con JSON Server, con validaciones y mejor experiencia de usuario.",
+    "Gestión de contactos conectada a una API con JSON Server, con validaciones y mejor experiencia de usuario.",
 };

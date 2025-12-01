@@ -1,60 +1,88 @@
 // Archivo: src/api.js
-// Capa de acceso a datos de Agenda ADSO (API REST)
+// Capa de acceso a datos (API REST)
 
 // Importamos la URL base desde config.js
 import { API_BASE_URL } from "./config";
 
 /* ============================
-   GET: Listar todos los contactos
+   GET: Listar contactos
    ============================ */
 export async function listarContactos() {
-  const res = await fetch(API_BASE_URL);
-  if (!res.ok) throw new Error("Error al listar contactos");
-  return res.json();
+  try {
+    const res = await fetch(`${API_BASE_URL}/contactos`);
+    if (!res.ok) throw new Error("Error al listar contactos");
+    return await res.json();
+  } catch (error) {
+    console.error("Error en listarContactos:", error);
+    throw error;
+  }
 }
 
 /* ============================
-   GET: Obtener un contacto por ID
+   GET: Obtener contacto por ID
    ============================ */
 export async function obtenerContactoPorId(id) {
-  const res = await fetch(`${API_BASE_URL}/${id}`);
-  if (!res.ok) throw new Error("Error al obtener el contacto");
-  return res.json();
+  try {
+    const res = await fetch(`${API_BASE_URL}/contactos/${id}`);
+    if (!res.ok) throw new Error("Error al obtener el contacto");
+    return await res.json();
+  } catch (error) {
+    console.error("Error en obtenerContactoPorId:", error);
+    throw error;
+  }
 }
 
 /* ============================
    POST: Crear contacto
    ============================ */
 export async function crearContacto(data) {
-  const res = await fetch(API_BASE_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
+  try {
+    const res = await fetch(`${API_BASE_URL}/contactos`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
 
-  if (!res.ok) throw new Error("Error al crear el contacto");
-  return res.json();
+    if (!res.ok) throw new Error("Error al crear el contacto");
+    return await res.json();
+  } catch (error) {
+    console.error("Error en crearContacto:", error);
+    throw error;
+  }
 }
 
 /* ============================
-   PUT: Actualizar contacto por ID
+   PUT: Actualizar contacto
    ============================ */
 export async function actualizarContacto(id, data) {
-  const res = await fetch(`${API_BASE_URL}/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
+  try {
+    const res = await fetch(`${API_BASE_URL}/contactos/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
 
-  if (!res.ok) throw new Error("Error al actualizar el contacto");
-  return res.json();
+    if (!res.ok) throw new Error("Error al actualizar el contacto");
+    return await res.json();
+  } catch (error) {
+    console.error("Error en actualizarContacto:", error);
+    throw error;
+  }
 }
 
 /* ============================
-   DELETE: Eliminar contacto por ID
+   DELETE: Eliminar contacto
    ============================ */
 export async function eliminarContactoPorId(id) {
-  const res = await fetch(`${API_BASE_URL}/${id}`, { method: "DELETE" });
-  if (!res.ok) throw new Error("Error al eliminar el contacto");
-  return true;
+  try {
+    const res = await fetch(`${API_BASE_URL}/contactos/${id}`, {
+      method: "DELETE",
+    });
+
+    if (!res.ok) throw new Error("Error al eliminar el contacto");
+    return true;
+  } catch (error) {
+    console.error("Error en eliminarContactoPorId:", error);
+    throw error;
+  }
 }
