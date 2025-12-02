@@ -1,21 +1,21 @@
 {
   "contactos": [
     {
-      "id": "a3f6",
-      "nombre": "juan",
+      "id": "1",
+      "nombre": "Juan",
       "telefono": "3115429648",
       "correo": "juanse@gmail.com",
       "etiqueta": "Profesor"
     },
     {
-      "id": "266c",
-      "nombre": "Jose",
+      "nombre": "Jose Ramirez",
       "telefono": "3115429648",
       "correo": "joselito@gmail.com",
-      "etiqueta": "Profesor"
+      "etiqueta": "Profesor",
+      "id": "2"
     },
     {
-      "id": "be2e",
+      "id": "3",
       "nombre": "Samantha",
       "telefono": "3005647866",
       "correo": "samna@gmail.com",

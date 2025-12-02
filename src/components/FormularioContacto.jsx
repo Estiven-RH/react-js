@@ -1,16 +1,17 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function FormularioContacto({
   onAgregar,
-  contactoEnEdicion,
-  onGuardarEdicion,
+  onActualizar,
+  editando,
+  cancelarEdicion,
 }) {
   // Estado del formulario
   const [form, setForm] = useState({
-    nombre: contactoEnEdicion?.nombre || "",
-    telefono: contactoEnEdicion?.telefono || "",
-    correo: contactoEnEdicion?.correo || "",
-    etiqueta: contactoEnEdicion?.etiqueta || "",
+    nombre: "",
+    telefono: "",
+    correo: "",
+    etiqueta: "",
   });
 
   // Estado de errores
@@ -20,16 +21,38 @@ export default function FormularioContacto({
     correo: "",
   });
 
-  // Estado envío
+  // Envío
   const [enviando, setEnviando] = useState(false);
 
-  // Mensaje éxito
+  // Mensaje de éxito
   const [mensajeExito, setMensajeExito] = useState("");
 
   // Error API
   const [errorApi, setErrorApi] = useState("");
 
-  // Cambio de inputs
+  /* ================================
+     Cargar datos cuando editando cambia
+     ================================ */
+  useEffect(() => {
+    if (editando) {
+      setForm({
+        nombre: editando.nombre,
+        telefono: editando.telefono,
+        correo: editando.correo,
+        etiqueta: editando.etiqueta || "",
+      });
+    } else {
+      // Reset si se cancela edición
+      setForm({
+        nombre: "",
+        telefono: "",
+        correo: "",
+        etiqueta: "",
+      });
+    }
+  }, [editando]);
+
+  // Manejo de inputs
   const onChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -45,25 +68,20 @@ export default function FormularioContacto({
     if (!form.telefono.trim()) {
       nuevosErrores.telefono = "El teléfono es obligatorio.";
     } else if (form.telefono.trim().length < 7) {
-      nuevosErrores.telefono = "El teléfono debe tener al menos 7 dígitos.";
+      nuevosErrores.telefono = "Debe tener al menos 7 dígitos.";
     }
 
     if (!form.correo.trim()) {
       nuevosErrores.correo = "El correo es obligatorio.";
     } else if (!form.correo.includes("@")) {
-      nuevosErrores.correo = "El correo debe contener @.";
+      nuevosErrores.correo = "Debe contener @.";
     }
 
     setErrores(nuevosErrores);
-
-    return (
-      !nuevosErrores.nombre &&
-      !nuevosErrores.telefono &&
-      !nuevosErrores.correo
-    );
+    return !nuevosErrores.nombre && !nuevosErrores.telefono && !nuevosErrores.correo;
   }
 
-  // Submit
+  // Submit general (crear o editar)
   const onSubmit = async (e) => {
     e.preventDefault();
 
@@ -74,19 +92,19 @@ export default function FormularioContacto({
     try {
       setEnviando(true);
 
-      if (contactoEnEdicion) {
-        await onGuardarEdicion(contactoEnEdicion.id, form);
+      if (editando) {
+        // Modo edición
+        await onActualizar(form);
       } else {
+        // Modo creación
         await onAgregar(form);
       }
 
-      // Mostrar mensaje de éxito
       setMensajeExito("✓ Contacto guardado correctamente");
 
-      // Ocultar después de 2 segundos
       setTimeout(() => setMensajeExito(""), 2000);
 
-      // Resetear
+      // Reset
       setForm({
         nombre: "",
         telefono: "",
@@ -95,10 +113,11 @@ export default function FormularioContacto({
       });
 
       setErrores({ nombre: "", telefono: "", correo: "" });
+
+      if (editando) cancelarEdicion(); // salir del modo edición
+
     } catch (error) {
-      setErrorApi(
-        "❌ No se pudo guardar el contacto. Revisa si el servidor JSON está activo."
-      );
+      setErrorApi("❌ No se pudo guardar. Verifique el servidor JSON.");
     } finally {
       setEnviando(false);
     }
@@ -106,7 +125,7 @@ export default function FormularioContacto({
 
   return (
     <form onSubmit={onSubmit} className="space-y-6">
-      {/* Mensaje de éxito */}
+
       {mensajeExito && (
         <p className="text-green-600 font-semibold bg-green-100 border border-green-300 rounded-xl px-4 py-2">
           {mensajeExito}
@@ -120,15 +139,13 @@ export default function FormularioContacto({
             Nombre *
           </label>
           <input
-            className="w-full rounded-xl border-gray-300 focus:ring-purple-500 focus:border-purple-500"
+            className="w-full rounded-xl border-gray-300 focus:ring-purple-500"
             name="nombre"
             value={form.nombre}
             onChange={onChange}
             placeholder="Ej: Camila Pérez"
           />
-          {errores.nombre && (
-            <p className="text-xs text-red-600 mt-1">{errores.nombre}</p>
-          )}
+          {errores.nombre && <p className="text-xs text-red-600">{errores.nombre}</p>}
         </div>
 
         {/* Teléfono */}
@@ -137,15 +154,13 @@ export default function FormularioContacto({
             Teléfono *
           </label>
           <input
-            className="w-full rounded-xl border-gray-300 focus:ring-purple-500 focus:border-purple-500"
+            className="w-full rounded-xl border-gray-300 focus:ring-purple-500"
             name="telefono"
             value={form.telefono}
             onChange={onChange}
             placeholder="Ej: 300 123 4567"
           />
-          {errores.telefono && (
-            <p className="text-xs text-red-600 mt-1">{errores.telefono}</p>
-          )}
+          {errores.telefono && <p className="text-xs text-red-600">{errores.telefono}</p>}
         </div>
       </div>
 
@@ -155,15 +170,13 @@ export default function FormularioContacto({
           Correo *
         </label>
         <input
-          className="w-full rounded-xl border-gray-300 focus:ring-purple-500 focus:border-purple-500"
+          className="w-full rounded-xl border-gray-300 focus:ring-purple-500"
           name="correo"
           value={form.correo}
           onChange={onChange}
           placeholder="Ej: camila@sena.edu.co"
         />
-        {errores.correo && (
-          <p className="text-xs text-red-600 mt-1">{errores.correo}</p>
-        )}
+        {errores.correo && <p className="text-xs text-red-600">{errores.correo}</p>}
       </div>
 
       {/* Etiqueta */}
@@ -172,7 +185,7 @@ export default function FormularioContacto({
           Etiqueta (opcional)
         </label>
         <input
-          className="w-full rounded-xl border-gray-300 focus:ring-purple-500 focus:border-purple-500"
+          className="w-full rounded-xl border-gray-300 focus:ring-purple-500"
           name="etiqueta"
           value={form.etiqueta}
           onChange={onChange}
@@ -180,23 +193,32 @@ export default function FormularioContacto({
         />
       </div>
 
-      {/* Botón */}
-      <button
-        type="submit"
-        disabled={enviando}
-        className="w-full md:w-auto bg-purple-600 hover:bg-purple-700 disabled:bg-purple-300 text-white px-6 py-3 rounded-xl font-semibold shadow-sm"
-      >
-        {enviando
-          ? "Guardando..."
-          : contactoEnEdicion
-          ? "Guardar cambios"
-          : "Agregar contacto"}
-      </button>
+      {/* Botones */}
+      <div className="flex items-center gap-3">
+        <button
+          type="submit"
+          disabled={enviando}
+          className="bg-purple-600 hover:bg-purple-700 disabled:bg-purple-300 text-white px-6 py-3 rounded-xl font-semibold shadow-sm"
+        >
+          {enviando
+            ? "Guardando..."
+            : editando
+            ? "Guardar cambios"
+            : "Agregar contacto"}
+        </button>
 
-      {/* Error API */}
-      {errorApi && (
-        <p className="text-sm text-red-600 font-medium mt-2">{errorApi}</p>
-      )}
+        {editando && (
+          <button
+            type="button"
+            onClick={cancelarEdicion}
+            className="px-6 py-3 rounded-xl border bg-gray-200 hover:bg-gray-300 text-sm font-semibold"
+          >
+            Cancelar
+          </button>
+        )}
+      </div>
+
+      {errorApi && <p className="text-sm text-red-600">{errorApi}</p>}
     </form>
   );
 }

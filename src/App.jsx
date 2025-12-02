@@ -3,9 +3,10 @@ import {
   listarContactos,
   crearContacto,
   eliminarContactoPorId,
+  actualizarContacto,
 } from "./api";
-import { APP_INFO } from "./config";
 
+import { APP_INFO } from "./config";
 import FormularioContacto from "./components/FormularioContacto";
 import ContactoCard from "./components/ContactoCard";
 
@@ -17,43 +18,75 @@ function App() {
   const [busqueda, setBusqueda] = useState("");
   const [ordenAsc, setOrdenAsc] = useState(true);
 
+  // Contacto seleccionado para editar
+  const [editando, setEditando] = useState(null);
+
+  /* ===========================
+      Cargar contactos al iniciar
+     =========================== */
   useEffect(() => {
-    const cargarContactos = async () => {
+    const cargar = async () => {
       try {
         setCargando(true);
         const data = await listarContactos();
         setContactos(data);
-      } catch (error) {
-        setError("Error cargando contactos. Verifique el servidor.");
+      } catch {
+        setError("Error cargando contactos. Verifique JSON Server (puerto 3001).");
       } finally {
         setCargando(false);
       }
     };
 
-    cargarContactos();
+    cargar();
   }, []);
 
+  /* ===========================
+      CREAR NUEVO CONTACTO
+     =========================== */
   const onAgregarContacto = async (nuevo) => {
     try {
       setError("");
       const creado = await crearContacto(nuevo);
-      setContactos((p) => [...p, creado]);
-    } catch (error) {
+      setContactos((prev) => [...prev, creado]);
+    } catch {
       setError("No se pudo guardar el contacto.");
-      throw error;
     }
   };
 
+  /* ===========================
+      GUARDAR EDICIÓN
+     =========================== */
+  const onGuardarEdicion = async (dataActualizada) => {
+    try {
+      setError("");
+      const actualizado = await actualizarContacto(editando.id, dataActualizada);
+
+      setContactos((prev) =>
+        prev.map((c) => (c.id === editando.id ? actualizado : c))
+      );
+
+      setEditando(null);
+    } catch {
+      setError("No se pudo actualizar el contacto.");
+    }
+  };
+
+  /* ===========================
+      ELIMINAR CONTACTO
+     =========================== */
   const onEliminarContacto = async (id) => {
     try {
       setError("");
       await eliminarContactoPorId(id);
-      setContactos((p) => p.filter((c) => c.id !== id));
+      setContactos((prev) => prev.filter((c) => c.id !== id));
     } catch {
       setError("No se pudo eliminar el contacto.");
     }
   };
 
+  /* ===========================
+      BUSCAR Y ORDENAR
+     =========================== */
   const contactosFiltrados = contactos.filter((c) => {
     const t = busqueda.toLowerCase();
     return (
@@ -71,37 +104,38 @@ function App() {
     return 0;
   });
 
+  /* ===========================
+      RENDER
+     =========================== */
   return (
     <div className="min-h-screen bg-[#0f0f16] text-white px-4 py-6">
-
-      {/* Título global */}
+      {/* Header */}
       <header className="max-w-6xl mx-auto mb-10">
         <h1 className="text-4xl font-bold">{APP_INFO.titulo}</h1>
         <p className="text-gray-300 text-sm mt-1">{APP_INFO.subtitulo}</p>
       </header>
 
-      {/* Layout principal: 2 columnas */}
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-        {/* Panel izquierdo (2 columnas) */}
+        {/* Columna principal */}
         <div className="lg:col-span-2">
-
-          {/* Cantidad de contactos */}
           <div className="flex items-center gap-2 mb-3">
             <span className="h-3 w-3 rounded-full bg-green-500"></span>
-            <p className="text-sm text-gray-300">
-              {contactos.length} contactos
-            </p>
+            <p className="text-sm text-gray-300">{contactos.length} contactos</p>
           </div>
 
-          {/* Caja blanca grande */}
           <div className="bg-white text-black rounded-3xl p-8 shadow-xl">
+            <h2 className="text-2xl font-bold mb-4">
+              {editando ? "Editar contacto" : "Nuevo contacto"}
+            </h2>
 
-            {/* FORMULARIO */}
-            <h2 className="text-2xl font-bold mb-4">Nuevo contacto</h2>
-            <FormularioContacto onAgregar={onAgregarContacto} />
+            <FormularioContacto
+              onAgregar={onAgregarContacto}
+              onActualizar={onGuardarEdicion}
+              editando={editando}
+              cancelarEdicion={() => setEditando(null)}
+            />
 
-            {/* BUSCADOR */}
+            {/* Buscador */}
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 my-6">
               <input
                 type="text"
@@ -113,22 +147,18 @@ function App() {
 
               <button
                 className="bg-gray-100 text-gray-700 text-sm px-4 py-2 rounded-xl border hover:bg-gray-200"
-                onClick={() => setOrdenAsc((p) => !p)}
+                onClick={() => setOrdenAsc((prev) => !prev)}
               >
                 {ordenAsc ? "Ordenar Z-A" : "Ordenar A-Z"}
               </button>
             </div>
 
-            {/* LISTA DE CONTACTOS */}
-            {error && (
-              <p className="text-red-600 text-sm mb-4">{error}</p>
-            )}
+            {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
 
+            {/* Lista */}
             <section className="space-y-4">
               {cargando ? (
-                <p className="text-gray-500 text-sm">
-                  Cargando contactos...
-                </p>
+                <p className="text-gray-500 text-sm">Cargando contactos...</p>
               ) : contactosOrdenados.length === 0 ? (
                 <p className="text-gray-500 text-sm">
                   No hay contactos que coincidan con la búsqueda.
@@ -137,11 +167,9 @@ function App() {
                 contactosOrdenados.map((c) => (
                   <ContactoCard
                     key={c.id}
-                    nombre={c.nombre}
-                    telefono={c.telefono}
-                    correo={c.correo}
-                    etiqueta={c.etiqueta}
+                    {...c}
                     onEliminar={() => onEliminarContacto(c.id)}
+                    onEditar={() => setEditando(c)}
                   />
                 ))
               )}
@@ -149,38 +177,30 @@ function App() {
           </div>
         </div>
 
-        {/* PANEL DERECHO - DASHBOARD */}
+        {/* Panel lateral */}
         <aside className="space-y-6">
           <div className="bg-purple-600 text-white rounded-3xl p-6 shadow-lg">
-            <h3 className="text-xl font-bold">
-              Agenda ADSO – Dashboard
-            </h3>
+            <h3 className="text-xl font-bold">Agenda ADSO – Dashboard</h3>
             <p className="text-sm text-purple-100 mt-1">
-              CRUD completo con React, JSON Server y validaciones.
+              CRUD completo con React + JSON Server.
             </p>
 
-            <p className="mt-4 text-sm font-semibold">
-              Contactos registrados
-            </p>
-            <p className="text-4xl font-extrabold mt-1">
-              {contactos.length}
-            </p>
+            <p className="mt-4 text-sm font-semibold">Contactos registrados</p>
+            <p className="text-4xl font-extrabold mt-1">{contactos.length}</p>
           </div>
 
-          {/* TIPS */}
           <div className="bg-white text-black rounded-3xl p-6 shadow-lg">
             <h3 className="text-lg font-bold mb-2">Tips de código limpio</h3>
             <ul className="text-sm space-y-1">
-              <li>• Nombra componentes según su responsabilidad.</li>
-              <li>• Extrae funciones reutilizables.</li>
-              <li>• Comenta la intención, no lo obvio.</li>
-              <li>• Archivos pequeños y claros.</li>
+              <li>• Componentes pequeños y claros.</li>
+              <li>• Extrae funciones repetidas.</li>
+              <li>• Evita lógica mezclada en el render.</li>
+              <li>• Usa nombres descriptivos.</li>
             </ul>
           </div>
 
-          {/* Footer pequeño */}
           <div className="bg-gray-900 rounded-3xl p-6 text-center text-xs text-gray-400">
-            <p>Desarrollo Web – ReactJS</p>
+            <p>Desarrollo Web – React</p>
             <p>SENA CTMA</p>
             <p>Ficha {APP_INFO.ficha}</p>
           </div>

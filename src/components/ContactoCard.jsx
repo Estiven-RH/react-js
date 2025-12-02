@@ -1,10 +1,18 @@
 // Este componente muestra un contacto individual.
-// Incluye nombre, teléfono, correo, etiqueta y el botón de eliminar.
+// Incluye nombre, teléfono, correo, etiqueta, y botones editar + eliminar.
 
-export default function ContactoCard({ nombre, telefono, correo, etiqueta, onEliminar }) {
+export default function ContactoCard({
+  id,
+  nombre,
+  telefono,
+  correo,
+  etiqueta,
+  onEliminar,
+  onEditar,
+}) {
   return (
     <div className="bg-white shadow-sm border border-gray-200 rounded-2xl p-6 flex items-start justify-between">
-      
+
       {/* Información del contacto */}
       <div className="space-y-1">
         {/* Nombre */}
@@ -22,7 +30,7 @@ export default function ContactoCard({ nombre, telefono, correo, etiqueta, onEli
           {correo}
         </p>
 
-        {/* Etiqueta (si existe) */}
+        {/* Etiqueta */}
         {etiqueta && (
           <span className="inline-block bg-gray-100 text-gray-700 text-xs px-3 py-1 rounded-full mt-2">
             {etiqueta}
@@ -30,13 +38,25 @@ export default function ContactoCard({ nombre, telefono, correo, etiqueta, onEli
         )}
       </div>
 
-      {/* Botón de eliminar */}
-      <button
-        onClick={onEliminar}
-        className="bg-red-500 hover:bg-red-600 text-white text-sm px-4 py-2 rounded-lg shadow transition"
-      >
-        Eliminar
-      </button>
+      {/* Botones Editar / Eliminar */}
+      <div className="flex flex-col gap-2">
+
+        {/* Botón Editar */}
+        <button
+          onClick={() => onEditar(id)}
+          className="bg-blue-500 hover:bg-blue-600 text-white text-sm px-4 py-2 rounded-lg shadow transition"
+        >
+          Editar
+        </button>
+
+        {/* Botón Eliminar */}
+        <button
+          onClick={onEliminar}
+          className="bg-red-500 hover:bg-red-600 text-white text-sm px-4 py-2 rounded-lg shadow transition"
+        >
+          Eliminar
+        </button>
+      </div>
     </div>
   );
 }

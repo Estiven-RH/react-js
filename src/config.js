@@ -3,10 +3,8 @@
 
 // =============================================
 // URL base del backend (JSON Server)
-// Nunca incluir /contactos aquí, solo la URL base.
 // =============================================
-export const API_BASE_URL = "http://localhost:3001";  
-// En producción Netlify usará otra URL (te la configuro después)
+export const API_BASE_URL = "http://localhost:3001";
 
 // =============================================
 // Información general de la aplicación
